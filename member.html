@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Thành viên nhóm</title>
+<style>
+  /* ===== NỀN VŨ TRỤ ===== */
+  :root { --accent: #00b3ff; --gold: 255,215,0; }
+  *{box-sizing:border-box}
+  body{
+    margin:0;padding:80px 50px;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;gap:40px;
+    background:radial-gradient(circle at 30% 30%, #070712, #000 90%);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial;
+    color:#fff;overflow-x:hidden;
+  }
+
+  /* ===== TIÊU ĐỀ ===== */
+  h1.title {
+    font-size: 42px;
+    color: var(--accent);
+    text-shadow: 0 0 12px rgba(0,179,255,0.6);
+    margin-top: 10px;
+    margin-bottom: 0;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  .nebula{
+    position:fixed;top:-50%;left:-50%;width:200%;height:200%;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(0,150,255,0.12), transparent 70%),
+      radial-gradient(circle at 80% 80%, rgba(170,0,255,0.14), transparent 70%),
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,0.03), transparent 80%);
+    mix-blend-mode:screen;filter:blur(150px);
+    animation:moveNebula 60s linear infinite;z-index:-3;
+  }
+  @keyframes moveNebula{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-10%,-5%) scale(1.2)}100%{transform:translate(0,0) scale(1)}}
+
+  /* layer sao */
+  .stars{position:fixed;inset:0;z-index:-2;pointer-events:none}
+  .star{position:absolute;background:#fff;border-radius:50%;opacity:0.8;animation:twinkle 3s infinite ease-in-out}
+  @keyframes twinkle{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.3)}}
+
+  /* ===== BACK LOGO (nút về) ===== */
+  .back-btn{
+    position:fixed;top:18px;left:22px;z-index:20;
+    background:none;border:none;cursor:pointer;padding:6px;border-radius:50%;
+    transition:transform .28s ease, filter .28s ease;
+  }
+  .back-logo{
+    width:60px;height:60px;border-radius:50%;
+    box-shadow:0 0 10px rgba(var(--gold),0.28);display:block;
+    transition:transform .3s ease,box-shadow .3s ease,filter .3s ease;
+  }
+  .back-btn:hover .back-logo{ transform:scale(1.08) rotate(-10deg); box-shadow:0 0 26px rgba(var(--gold),0.55); filter:brightness(1.12) }
+
+  /* ===== LAYOUT ===== */
+  .members-container{display:flex;flex-direction:column;gap:40px; width:100%; max-width:1100px}
+  .row{display:flex;justify-content:center;gap:25px;flex-wrap:wrap}
+
+  /* ===== CARD ===== */
+  .member{
+    position:relative;width:220px;height:280px;border-radius:20px;overflow:hidden;
+    background:rgba(20,20,20,0.92);cursor:pointer;transition:transform .36s ease,box-shadow .36s ease;
+    box-shadow:0 6px 18px rgba(255,255,255,0.04);z-index:1;
+  }
+  .member img{width:100%;height:100%;object-fit:cover;border-radius:20px;transition:transform .36s ease,filter .36s ease}
+  .member:hover img{transform:scale(1.08);filter:brightness(1.08)}
+
+  .preview{
+    position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:18px;
+    background:linear-gradient(180deg,transparent,rgba(0,0,0,0.72));
+    color:#fff;font-size:18px;opacity:0;transform:translateY(6px);transition:all .28s ease;pointer-events:none;
+  }
+  .member:hover .preview{opacity:1;transform:translateY(0)}
+
+  /* light pulse */
+  .member::after{
+    content:"";position:absolute;inset:0;border-radius:20px;
+    background:radial-gradient(circle at center, rgba(0,179,255,0.28), transparent 60%);
+    opacity:0;transform:scale(.6);transition:opacity .3s, transform .6s;z-index:0;pointer-events:none;
+  }
+  .member.active::after{opacity:1;transform:scale(3);animation:pulse 1.2s ease-out forwards}
+  @keyframes pulse{0%{opacity:.9;transform:scale(.6)}100%{opacity:0;transform:scale(3)}}
+
+  /* dim khi 1 expanded */
+  .member.dimmed{opacity:.28;filter:blur(1px);transform:scale(.98)}
+
+  /* ===== FULL-SCREEN EXPAND ===== */
+  .member.expanded{
+    position:fixed;inset:0;width:100vw;height:100vh;border-radius:0;background:rgba(8,8,12,0.98);
+    z-index:100;animation:expandFull .6s cubic-bezier(.2,.9,.2,1) forwards;
+    display:block; /* ensure block for appended close button */
+  }
+  @keyframes expandFull{
+    0%{transform:scale(.4) rotateY(6deg);opacity:0;filter:brightness(.6)}
+    60%{transform:scale(1.03) rotateY(0);opacity:1}
+    100%{transform:scale(1) rotateY(0);filter:brightness(1)}
+  }
+  @keyframes shrinkOut{0%{transform:scale(1);opacity:1}100%{transform:scale(.4) translateY(50px);opacity:0}}
+
+  /* details inside full screen */
+  .member .details{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;max-width:1000px;
+    text-align:center;color:#eee;opacity:0;pointer-events:none;
+  }
+  .member.expanded .details{opacity:1;pointer-events:auto;animation:fadeIn .9s ease .35s forwards}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+  .details h3{color:var(--accent);font-size:34px;margin:0 0 14px}
+  .details p{font-size:18px;line-height:1.6;margin:0 auto;max-width:900px}
+
+  /* close button shown when expanded */
+  .close-expanded{
+    position:absolute;top:20px;right:28px;background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.12);color:#fff;padding:8px 14px;border-radius:10px;
+    cursor:pointer;font-size:15px;z-index:105;opacity:0;transform:translateY(-6px);
+    transition:all .28s ease;
+  }
+  .member.expanded .close-expanded{opacity:1;transform:none;animation:fadeIn .4s ease .5s forwards}
+  .close-expanded:hover{background:rgba(255,255,255,0.18);transform:scale(1.05)}
+  /* ===== NỀN VÀ MÀU TRUNG TÍNH CHO PHẦN CHI TIẾT ===== */
+.member.expanded {
+  background: rgba(15, 15, 20, 0.95);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(16px);
+  color: #e6e6e6;
+}
+
+/* Khung nội dung chi tiết */
+.member.expanded .details {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 40px 30px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Tiêu đề và đoạn văn */
+.member.expanded .details h3 {
+  color: #00a8ff;
+  text-shadow: 0 0 8px rgba(0, 168, 255, 0.5);
+  font-size: 36px;
+  margin-bottom: 16px;
+}
+.member.expanded .details p {
+  color: #e0e0e0;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* Avatar nhẹ nhàng, viền sáng */
+.member.expanded .details .avatar {
+  box-shadow: 0 0 25px rgba(0, 168, 255, 0.4);
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Gallery ảnh */
+.member.expanded .gallery img {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 8px rgba(0, 168, 255, 0.25);
+}
+.member.expanded .gallery img:hover {
+  box-shadow: 0 0 14px rgba(0, 168, 255, 0.6);
+  transform: scale(1.05);
+}
+
+/* Liên kết mạng xã hội */
+.member.expanded .socials a {
+  color: #00a8ff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.member.expanded .socials a:hover {
+  color: #fff;
+  text-shadow: 0 0 12px #00a8ff;
+}
+
+/* Nút đóng */
+.member.expanded .close-expanded {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e0e0e0;
+}
+.member.expanded .close-expanded:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+  
+  /* responsive */
+  @media (max-width:800px){
+    .back-logo{width:48px;height:48px}
+    .member{width:180px;height:240px}
+  }
+  .details .avatar {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 10px auto 20px;
+  box-shadow: 0 0 20px rgba(0,179,255,0.3);
+  display: block;
+}
+
+.gallery {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px auto;
+}
+.gallery img {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 10px;
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.gallery img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(0,179,255,0.6);
+}
+
+.socials {
+  margin-top: 15px;
+  font-size: 17px;
+}
+.socials a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color .3s;
+}
+.socials a:hover {
+  color: #fff;
+  text-shadow: 0 0 10px var(--accent);
+}
+
+</style>
+</head>
+<body>
+
+<!-- back logo -->
+<button class="back-btn" id="backLogo" title="Trở lại trang trước">
+  <img src="assets/logo.jpg" alt="Back Logo" class="back-logo">
+</button>
+
+<!-- nebula + stars -->
+<div class="nebula" aria-hidden="true"></div>
+<div class="stars" id="stars" aria-hidden="true"></div>
+
+<!-- ===== TIÊU ĐỀ MỚI THÊM ===== -->
+<h1 class="title">THÀNH VIÊN TEAM DOWN</h1>
+
+<!-- members (3 trên, 2 dưới) -->
+<div class="members-container">
+
+  <div class="row">
+    <!-- Thành viên 1 -->
+    <div class="member">
+      <img src="assets/minh1.jpg" alt="Phạm Nhật Minh">
+      <div class="preview">Phạm Nhật Minh</div>
+
+      <div class="details">
+        <h3>Phạm Nhật Minh</h3>
+        <img class="avatar" src="assets/minh1.jpg" alt="Avatar Minh">
+        <p><strong>Quê quán:</strong> Hà Nội</p>
+        <p><strong>Sở thích:</strong> Lập trình web, UI/UX, đọc sách kỹ thuật.</p>
+        <p><strong>Chuyên môn:</strong> Front-end developer (React, CSS animation, responsive design).</p>
+        <p><strong>Dự án:</strong> Website thương mại điện tử, portfolio cá nhân, landing page sự kiện.</p>
+
+        <div class="gallery">
+          <img src="assets/minh1.jpg" alt="">
+          <img src="assets/minh2.jpg" alt="">
+          <img src="assets/minh3.jpg" alt="">
+          <img src="assets/minh4.jpg" alt="">
+        </div>
+
+        <div class="socials">
+          <div class="cv-download">
+  <a href="assets/cv-minh.pdf" download>📄 Download CV</a>
+</div>
+
+          <a href="https://facebook.com" target="_blank">Facebook</a> |
+          <a href="https://github.com" target="_blank">GitHub</a> |
+          <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thành viên 2 -->
+    <div class="member">
+      <img src="assets/bao1.jpg" alt="Mai Kim Bảo">
+      <div class="preview">Mai Kim Bảo</div>
+
+      <div class="details">
+        <h3>Mai Kim Bảo</h3>
+        <img class="avatar" src="assets/bao2.jpg" alt="Avatar Bảo">
+        <p><strong>Quê quán:</strong> TP. Hồ Chí Minh</p>
+        <p><strong>Sở thích:</strong> Thiết kế giao diện, chỉnh sửa video, hiệu ứng 3D.</p>
+        <p><strong>Chuyên môn:</strong> Front-end & UI effects, tối ưu UX animation.</p>
+        <p><strong>Dự án:</strong> App quản lý học tập, trang giới thiệu sản phẩm, mini game web.</p>
+
+        <div class="gallery">
+          <img src="assets/bao1.jpg" alt="">
+          <img src="assets/bao2.jpg" alt="">
+          <img src="assets/bao3.jpg" alt="">
+          <img src="assets/bao4.jpg" alt="">
+        </div>
+
+        <div class="socials">
+          <div class="cv-download">
+  <a href="assets/cv-minh.pdf" download>📄 Download CV</a>
+</div>
+
+          <a href="https://facebook.com" target="_blank">Facebook</a> |
+          <a href="https://github.com" target="_blank">GitHub</a> |
+          <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thành viên 3 -->
+    <div class="member">
+      <img src="assets/thai1.jpg" alt="Lương Xuân Thái">
+      <div class="preview">Lương Xuân Thái</div>
+
+      <div class="details">
+        <h3>Lương Xuân Thái</h3>
+        <img class="avatar" src="assets/thai1.jpg" alt="Avatar Thái">
+        <p><strong>Quê quán:</strong> Nghệ An</p>
+        <p><strong>Sở thích:</strong> Phân tích hệ thống, bảo mật và tìm hiểu cơ sở dữ liệu.</p>
+        <p><strong>Chuyên môn:</strong> Backend Developer (Node.js, MySQL, API).</p>
+        <p><strong>Dự án:</strong> Hệ thống quản lý sinh viên, RESTful API cho ứng dụng di động.</p>
+
+        <div class="gallery">
+          <img src="assets/thai1.jpg" alt="">
+          <img src="assets/thai2.jpg" alt="">
+          <img src="assets/thai3.jpg" alt="">
+          <img src="assets/thai4.jpg" alt="">
+        </div>
+
+        <div class="socials">
+          <div class="cv-download">
+  <a href="assets/cv-minh.pdf" download>📄 Download CV</a>
+</div>
+
+          <a href="https://facebook.com" target="_blank">Facebook</a> |
+          <a href="https://github.com" target="_blank">GitHub</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Thành viên 4 -->
+    <div class="member">
+      <img src="assets/huy1.jpg" alt="Dương Gia Huy">
+      <div class="preview">Dương Gia Huy</div>
+
+      <div class="details">
+        <h3>Dương Gia Huy</h3>
+        <img class="avatar" src="assets/huy1.jpg" alt="Avatar Huy">
+        <p><strong>Quê quán:</strong> Bình Dương</p>
+        <p><strong>Sở thích:</strong> Du lịch, công nghệ mới, AI.</p>
+        <p><strong>Chuyên môn:</strong> Full-stack Developer (React, Express, MongoDB).</p>
+        <p><strong>Dự án:</strong> Hệ thống học online, blog chia sẻ công nghệ.</p>
+
+        <div class="gallery">
+          <img src="assets/huy1.jpg" alt="">
+          <img src="assets/huy2.jpg" alt="">
+          <img src="assets/huy3.jpg" alt="">
+          <img src="assets/huy4.jpg" alt="">
+        </div>
+
+        <div class="socials">
+          <div class="cv-download">
+  <a href="assets/cv-minh.pdf" download>📄 Download CV</a>
+</div>
+
+          <a href="https://facebook.com" target="_blank">Facebook</a> |
+          <a href="https://github.com" target="_blank">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thành viên 5 -->
+    <div class="member">
+      <img src="assets/the1.jpg" alt="Bùi Văn Anh Thế">
+      <div class="preview">Bùi Văn Anh Thế</div>
+
+      <div class="details">
+        <h3>Bùi Văn Anh Thế</h3>
+        <img class="avatar" src="assets/the1.jpg" alt="Avatar Thế">
+        <p><strong>Quê quán:</strong> Thanh Hóa</p>
+        <p><strong>Sở thích:</strong> Thiết kế đồ họa, vẽ digital art.</p>
+        <p><strong>Chuyên môn:</strong> UI/UX Designer, chỉnh màu và layout.</p>
+        <p><strong>Dự án:</strong> Website portfolio nghệ sĩ, app đặt lịch thiết kế.</p>
+
+        <div class="gallery">
+          <img src="assets/the1.jpg" alt="">
+          <img src="assets/the2.jpg" alt="">
+          <img src="assets/the3.jpg" alt="">
+          <img src="assets/the4.jpg" alt="">
+        </div>
+
+        <div class="socials">
+          <div class="cv-download">
+  <a href="assets/cv-minh.pdf" download>📄 Download CV</a>
+</div>
+
+          <a href="https://facebook.com" target="_blank">Facebook</a> |
+          <a href="https://instagram.com" target="_blank">Instagram</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ===== TẠO SAO NGẪU NHIÊN ===== */
+(function createStars(){
+  const starsContainer = document.getElementById('stars');
+  starsContainer.innerHTML = '';
+  for (let i = 0; i < 120; i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.top = Math.random()*100 + '%';
+    s.style.left = Math.random()*100 + '%';
+    const size = (Math.random()*1.6 + 0.6).toFixed(2);
+    s.style.width = s.style.height = size + 'px';
+    s.style.opacity = (0.2 + Math.random()*0.85).toFixed(2);
+    s.style.animationDelay = (Math.random()*3).toFixed(2) + 's';
+    starsContainer.appendChild(s);
+  }
+})();
+
+/* ===== HIỆN TRANG WELCOME ===== */
+(() => {
+  const members = Array.from(document.querySelectorAll('.member'));
+  const backLogo = document.getElementById('backLogo');
+  backLogo.addEventListener('click', () => window.history.back());
+
+  const portfolios = {
+    "Phạm Nhật Minh": "https://phamnhatminh-portfolio.com",
+    "Mai Kim Bảo": "https://maikimbao-portfolio.com",
+    "Lương Xuân Thái": "https://luongxuanthai-portfolio.com",
+    "Dương Gia Huy": "https://duonggiahuy-portfolio.com",
+    "Bùi Văn Anh Thế": "https://buivananh-the-portfolio.com"
+  };
+
+  // ===== TẠO WELCOME SCREEN =====
+  const welcomeScreen = document.createElement('div');
+  welcomeScreen.style.position = "fixed";
+  welcomeScreen.style.inset = "0";
+  welcomeScreen.style.background = "radial-gradient(circle at center, rgba(0,0,0,0.95), #000)";
+  welcomeScreen.style.display = "flex";
+  welcomeScreen.style.flexDirection = "column";
+  welcomeScreen.style.alignItems = "center";
+  welcomeScreen.style.justifyContent = "center";
+  welcomeScreen.style.color = "#fff";
+  welcomeScreen.style.zIndex = "999";
+  welcomeScreen.style.opacity = "0";
+  welcomeScreen.style.transition = "opacity .6s ease";
+  welcomeScreen.style.backdropFilter = "blur(8px)";
+  welcomeScreen.style.textAlign = "center";
+  welcomeScreen.style.padding = "20px";
+  welcomeScreen.style.pointerEvents = "none";
+  document.body.appendChild(welcomeScreen);
+
+  const title = document.createElement('h2');
+  title.textContent = "Welcome to my portfolio";
+  title.style.fontSize = "42px";
+  title.style.marginBottom = "30px";
+  title.style.color = "#00b3ff";
+  title.style.textShadow = "0 0 15px rgba(0,179,255,0.6)";
+  welcomeScreen.appendChild(title);
+
+  // ===== NÚT “GO” =====
+  const btn = document.createElement('button');
+  btn.textContent = "Let's Go →";
+  btn.style.fontSize = "20px";
+  btn.style.padding = "12px 26px";
+  btn.style.border = "none";
+  btn.style.borderRadius = "10px";
+  btn.style.cursor = "pointer";
+  btn.style.color = "#fff";
+  btn.style.background = "#00b3ff";
+  btn.style.boxShadow = "0 0 18px rgba(0,179,255,0.5)";
+  btn.style.transition = "transform .3s ease, background .3s ease";
+  btn.addEventListener('mouseover', () => {
+    btn.style.transform = "scale(1.08)";
+    btn.style.background = "#00cfff";
+  });
+  btn.addEventListener('mouseout', () => {
+    btn.style.transform = "scale(1)";
+    btn.style.background = "#00b3ff";
+  });
+  welcomeScreen.appendChild(btn);
+
+  // ===== NÚT “BACK” =====
+  const backBtn = document.createElement('button');
+  backBtn.textContent = "← Quay lại";
+  backBtn.style.fontSize = "18px";
+  backBtn.style.marginTop = "18px";
+  backBtn.style.padding = "10px 20px";
+  backBtn.style.border = "1px solid rgba(255,255,255,0.2)";
+  backBtn.style.borderRadius = "10px";
+  backBtn.style.background = "rgba(255,255,255,0.1)";
+  backBtn.style.color = "#fff";
+  backBtn.style.cursor = "pointer";
+  backBtn.style.transition = "all .3s ease";
+  backBtn.addEventListener('mouseover', () => backBtn.style.background = "rgba(255,255,255,0.25)");
+  backBtn.addEventListener('mouseout', () => backBtn.style.background = "rgba(255,255,255,0.1)");
+  backBtn.onclick = hideWelcome;
+  welcomeScreen.appendChild(backBtn);
+
+  // ===== ẨN WELCOME =====
+  function hideWelcome() {
+    welcomeScreen.style.opacity = "0";
+    welcomeScreen.style.pointerEvents = "none";
+    setTimeout(() => {
+      welcomeScreen.style.display = "none";
+    }, 600);
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") hideWelcome();
+  });
+
+  // ===== CLICK VÀO THÀNH VIÊN =====
+  members.forEach(m => {
+    const name = m.querySelector(".preview").textContent.trim();
+    m.addEventListener("click", () => {
+      const link = portfolios[name];
+      if (!link) return;
+      title.textContent = `Welcome to ${name}'s Portfolio`;
+      btn.onclick = () => window.location.href = link;
+
+      welcomeScreen.style.display = "flex";
+      setTimeout(() => {
+        welcomeScreen.style.opacity = "1";
+        welcomeScreen.style.pointerEvents = "auto";
+      }, 50);
+    });
+  });
+})();
+</script>
+</body>
+</html> 

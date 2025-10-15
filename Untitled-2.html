@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Web Bán Hàng - Demo</title>
+  <meta name="description" content="Mẫu web bán hàng đơn giản, responsive, thuần HTML/CSS/JS.">
+
+  <!-- Styles: neutral palette, modern UI -->
+  <style>
+    :root{
+      --bg:#f6f6f7; --card:#ffffff; --muted:#8b8f98; --accent:#2b2f33;
+      --primary:#1f2937; --glass: rgba(255,255,255,0.6);
+      --radius:12px; --shadow: 0 6px 18px rgba(18,20,26,0.08);
+      --accent-2: #6b7280;
+      --max-width:1100px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg),#eef0f2); color:var(--primary);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      display:flex; align-items:flex-start; justify-content:center; padding:36px 18px;
+    }
+
+    .container{width:100%; max-width:var(--max-width)}
+
+    header{
+      display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px;
+    }
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo{
+      width:56px; height:56px; border-radius:12px; background:linear-gradient(135deg,#fff,#f3f4f6);
+      display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px; color:var(--accent);
+      box-shadow: var(--shadow);
+    }
+    h1{font-size:20px; margin:0}
+    .search-wrap{display:flex; gap:8px; align-items:center}
+    .search{padding:10px 12px; border-radius:999px; border:1px solid #e6e9ee; background:var(--card); min-width:220px; box-shadow:var(--shadow);}
+    .controls{display:flex; gap:8px; align-items:center}
+    .btn{background:var(--card); border:1px solid #e6e9ee; padding:8px 12px; border-radius:10px; cursor:pointer; box-shadow:var(--shadow);}
+    .btn.primary{background:linear-gradient(180deg,#111827,#1f2937); color:white; border:none}
+
+    /* Layout */
+    .top-row{display:flex; gap:16px; align-items:center; margin-bottom:18px}
+    .sidebar{
+  width:320px;
+  max-width:30%;
+  min-width:260px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  position:sticky;
+  top:24px; /* 🆕 giữ sidebar cố định khi cuộn */
+  align-self:flex-start; /* 🆕 để căn lên trên */
+}
+    .main{flex:1}
+
+    .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px}
+
+    .card{background:var(--card); border-radius:14px; padding:12px; box-shadow:var(--shadow); transition:transform .22s ease, box-shadow .22s ease}
+    .card:hover{transform:translateY(-6px); box-shadow: 0 12px 30px rgba(18,20,26,0.12)}
+    .img{height:160px; border-radius:10px; background:linear-gradient(180deg,#f3f4f6,#e9eef2); display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--muted); overflow:hidden}
+    .meta{display:flex; justify-content:space-between; align-items:center; margin-top:10px}
+    .title{font-weight:600; font-size:14px}
+    .price{font-weight:700}
+
+    .filters{display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap}
+    .select{padding:8px 10px; border-radius:8px; border:1px solid #e6e9ee; background:var(--card)}
+
+    /* Cart */
+    .cart{background:linear-gradient(180deg,#ffffff,#fbfdff); border-radius:14px; padding:12px; box-shadow:var(--shadow)}
+    .cart h3{margin:0 0 8px}
+    .cart-list{max-height:360px; overflow:auto; display:flex; flex-direction:column; gap:8px}
+    .cart-item{display:flex; gap:8px; align-items:center}
+    .cart-thumb{width:56px; height:56px; border-radius:8px; background:#f3f4f6}
+    .cart-summary{margin-top:12px; display:flex; justify-content:space-between; font-weight:700}
+
+    /* Product modal */
+    .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(12,14,17,0.36); padding:24px}
+    .modal.open{display:flex}
+    .modal-card{width:100%; max-width:900px; background:var(--card); border-radius:14px; padding:18px; box-shadow:0 20px 50px rgba(6,7,8,0.3); display:grid; grid-template-columns: 1fr 1fr; gap:18px}
+    .modal-img{height:360px; border-radius:10px; background:linear-gradient(180deg,#f3f4f6,#e9eef2); display:flex; align-items:center; justify-content:center}
+    .close{position:absolute; top:18px; right:18px}
+
+    /* Responsive */
+    @media (max-width:900px){
+      .top-row{flex-direction:column; align-items:stretch}
+      .sidebar{order:2; width:100%}
+      .main{order:1}
+      .modal-card{grid-template-columns:1fr}
+      .img{height:140px}
+    }
+
+    footer{margin-top:18px; color:var(--muted); font-size:13px; text-align:center}
+
+    /* small helpers */
+    .muted{color:var(--muted); font-size:13px}
+    .qty-input{width:56px; text-align:center; padding:6px; border-radius:8px; border:1px solid #e6e9ee}
+    .member-btn {
+  background: linear-gradient(135deg, #1dade5, #0066ff, #620df4);
+  background-size: 300% 300%;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 30px;
+  padding: 8px 16px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 51, 255, 0.6);
+  transition: all 0.3s ease;
+  animation: gradientMove 3s ease infinite;
+}
+
+.member-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(13, 82, 231, 0.8);
+  filter: brightness(1.2);
+}
+
+/* Hiệu ứng chuyển động màu */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+  </style>
+</head>
+<body>
+  <div class="container" id="app">
+  <header>
+  <div class="brand">
+    <div class="logo" style="padding:0; background:none; box-shadow:none;">
+      <img src="assets/logo.jpg" alt="DownStore Logo" 
+           style="width:56px; height:56px; border-radius:12px; object-fit:cover;">
+    </div>
+    <div>
+      <h1>Down Store</h1>
+      <div class="muted">Demo web bán hàng - HTML/CSS/JS</div>
+    </div>
+  </div>
+
+  <div class="search-wrap">
+    <input id="search" class="search" placeholder="Tìm sản phẩm, ví dụ: VGA..." aria-label="Tìm sản phẩm">
+    <div class="controls">
+      <select id="sort" class="select" aria-label="Sắp xếp">
+        <option value="default">Sắp xếp: Mặc định</option>
+        <option value="price-asc">Giá: Thấp → Cao</option>
+        <option value="price-desc">Giá: Cao → Thấp</option>
+        <option value="name-asc">Tên: A → Z</option>
+      </select>
+      <button id="cartBtn" class="btn" aria-expanded="false">Giỏ (0)</button>
+      <button id="memberBtn" class="member-btn">Thành viên</button>
+    </div>
+  </div>
+</header>
+
+
+    <main class="top-row">
+      <section class="main">
+        <div class="filters">
+          <select id="category" class="select" aria-label="Lọc danh mục">
+            <option value="all">Tất cả danh mục</option>
+            <option value="Card">VGA 50series</option>
+            <option value="CPU">CPU</option>
+          </select>
+          <input id="minPrice" class="select" placeholder="Giá min" type="number" min="0">
+          <input id="maxPrice" class="select" placeholder="Giá max" type="number" min="0">
+          <button id="applyFilter" class="btn">Áp dụng</button>
+        </div>
+
+        <div id="productGrid" class="grid" aria-live="polite">
+          <!-- Sản phẩm sẽ được render bằng JS -->
+        </div>
+      </section>
+<aside class="sidebar">
+  <!-- 🛒 Banner khuyến mãi DownStore -->
+  <div class="card" style="padding:0; overflow:hidden; border-radius:14px; margin-bottom:16px; box-shadow:0 6px 18px rgba(18,20,26,0.1)">
+    <img src="assets/logo sale 20%.png" alt="DownStore Sale 20% ngày 15.10" style="width:100%; display:block;">
+  </div>
+
+  <div class="cart" id="cart">
+
+      <aside class="sidebar">
+        <div class="cart" id="cart">
+          <h3>Giỏ hàng</h3>
+          <div class="cart-list" id="cartList">
+            <div class="muted">Chưa có sản phẩm</div>
+          </div>
+          <div class="cart-summary">
+            <div>Tổng</div>
+            <div id="cartTotal">0₫</div>
+          </div>
+          <div style="margin-top:12px; display:flex; gap:8px">
+            <button id="checkout" class="btn primary">Thanh toán</button>
+            <button id="clearCart" class="btn">Xóa</button>
+          </div>
+        </div>
+
+        <div style="height:18px"></div>
+        <div class="card">
+          <h4>Thông tin</h4>
+          <p class="muted">Mẫu này là demo: chức năng giỏ hàng, tìm kiếm, lọc, sắp xếp. Tùy chỉnh ảnh, tên và giá trong phần <code>products</code> ở script.</p>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      © <span id="year"></span> Down Store - Demo web bán hàng
+    </footer>
+  </div>
+
+  <!-- Modal detail -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-card" role="document">
+      <button class="btn close" id="closeModal">Đóng</button>
+      <div class="modal-img" id="modalImg">Ảnh</div>
+      <div>
+        <h2 id="modalTitle">Tiêu đề</h2>
+        <p id="modalDesc" class="muted">Mô tả ngắn</p>
+        <div style="margin-top:12px; display:flex; gap:12px; align-items:center">
+          <div style="font-size:18px; font-weight:800" id="modalPrice">0₫</div>
+          <div style="margin-left:auto; display:flex; gap:8px; align-items:center">
+            <label for="modalQty" class="muted">Số lượng</label>
+            <input id="modalQty" class="qty-input" type="number" value="1" min="1">
+          </div>
+        </div>
+        <div style="margin-top:14px; display:flex; gap:8px">
+          <button id="addToCartModal" class="btn primary">Thêm vào giỏ</button>
+          <button id="buyNow" class="btn">Mua ngay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script: data + UI logic -->
+  <script>
+    // Demo data: chỉnh sửa trực tiếp ở đây
+    const products = [
+  {id:1, name:'Card màn hình MSI RTX 5050 8G GAMING OC', price:9890000, category:'Card', img:'assets/RTX 5050.webp', desc:'Card màn hình MSI RTX 5050 8G GAMING OC'},
+  {id:2, name:'Card màn hình MSI GeForce RTX 5060 8G GAMING OC', price:11190000, category:'Card', img:'assets/RTX 5060.webp', desc:'Card màn hình MSI GeForce RTX 5060 8G GAMING OC'},
+  {id:3, name:'Card màn hình MSI RTX 5060 Ti 16G SHADOW 2X OC PLUS GDDR7', price:14340000, category:'Card', img:'assets/RTX 5060 Ti.webp', desc:'Card màn hình MSI RTX 5060 Ti 16G SHADOW 2X OC PLUS GDDR7'},
+  {id:4, name:'Card màn hình MSI RTX 5070 12G GAMING TRIO OC GDDR7', price:21990000, category:'Card', img:'assets/RTX 5070.webp', desc:'Card màn hình MSI RTX 5070 12G GAMING TRIO OC GDDR7'},
+  {id:5, name:'Card màn hình MSI RTX 5070 Ti 16G GAMING TRIO OC PLUS GDDR7', price:32190000, category:'Card', img:'assets/RTX 5070 Ti.webp', desc:'Card màn hình MSI RTX 5070 Ti 16G GAMING TRIO OC PLUS GDDR7'},
+  {id:6, name:'Card màn hình MSI RTX 5080 16G GAMING TRIO OC GDDR7', price:44490000, category:'Card', img:'assets/RTX 5080.webp', desc:'Card màn hình MSI RTX 5080 16G GAMING TRIO OC GDDR7'},
+
+  // 🆕 Thêm 6 sản phẩm mới
+  {id:7, name:'Card màn hình MSI RTX 5090 24G SUPRIM X', price:69990000, category:'Card', img:'assets/RTX 5090.webp', desc:'Card màn hình MSI RTX 5090 24G SUPRIM X'},
+  {id:8, name:'CPU AMD Ryzen 7 9700X (8 nhân 16 luồng - Boost to 5.5 GHz - 32MB - AM5)', price:9590000, category:'CPU', img:'assets/AMD 7 9700X.webp', desc:'CPU AMD Ryzen 7 9700X (8 nhân 16 luồng - Boost to 5.5 GHz - 32MB - AM5)'},
+  {id:9, name:'CPU AMD Ryzen 7 9800X3D (8 nhân 16 luồng - Boost to 5.2 GHz - 104MB - AM5)', price:13890000, category:'CPU', img:'assets/AMD 7 9800X3D.webp', desc:'CPU AMD Ryzen 7 9800X3D (8 nhân 16 luồng - Boost to 5.2 GHz - 104MB - AM5)'},
+  {id:10, name:'CPU AMD Ryzen 9 9900X (12 nhân 24 luồng - Boost to 5.6 GHz - 64MB - AM5)', price:12700000, category:'CPU', img:'assets/AMD 9 9900X.webp', desc:'CPU AMD Ryzen 9 9900X (12 nhân 24 luồng - Boost to 5.6 GHz - 64MB - AM5)'},
+  {id:11, name:'CPU AMD Ryzen 9 9950X (16 nhân 32 luồng - Boost to 5.1 GHz - 64MB - AM5)', price:18200000, category:'CPU', img:'assets/AMD 9 9950X.webp', desc:'CPU AMD Ryzen 9 9950X (16 nhân 32 luồng - Boost to 5.1 GHz - 64MB - AM5)'},
+  {id:12, name:'CPU AMD Ryzen 9 9950X3D (16C-32T | Up to 5.7GHz | 144MB | Radeon Graphics 2CUs - RDNA 2.0 | No Cooler | AM5)', price:19900000, category:'CPU', img:'assets/AMD 9 9950X3D.webp', desc:'CPU AMD Ryzen 9 9950X3D (16C-32T | Up to 5.7GHz | 144MB | Radeon Graphics 2CUs - RDNA 2.0 | No Cooler | AM5)'}
+];
+
+
+    // Utilities
+    const formatVND = v => v.toLocaleString('vi-VN') + '₫';
+
+    // App state
+    let state = {filtered: [...products], cart: []};
+
+    // Elements
+    const productGrid = document.getElementById('productGrid');
+    const searchInput = document.getElementById('search');
+    const sortSelect = document.getElementById('sort');
+    const categorySelect = document.getElementById('category');
+    const minPrice = document.getElementById('minPrice');
+    const maxPrice = document.getElementById('maxPrice');
+    const applyFilter = document.getElementById('applyFilter');
+    const cartBtn = document.getElementById('cartBtn');
+    const cartList = document.getElementById('cartList');
+    const cartTotal = document.getElementById('cartTotal');
+    const checkout = document.getElementById('checkout');
+    const clearCart = document.getElementById('clearCart');
+    const yearSpan = document.getElementById('year');
+
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modalImg');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalPrice = document.getElementById('modalPrice');
+    const modalQty = document.getElementById('modalQty');
+    const addToCartModal = document.getElementById('addToCartModal');
+    const closeModal = document.getElementById('closeModal');
+
+    // Init
+    yearSpan.textContent = new Date().getFullYear();
+    renderProducts(state.filtered);
+    renderCart();
+
+    // Render helpers
+    function renderProducts(list){
+      productGrid.innerHTML = '';
+      if(!list.length){ productGrid.innerHTML = '<div class="muted">Không tìm thấy sản phẩm</div>'; return }
+      list.forEach(p => {
+        const el = document.createElement('article'); el.className='card';
+        el.innerHTML = `
+          <div class="img" aria-hidden="true">${p.img?'<img src="'+p.img+'" alt="'+escapeHtml(p.name)+'" style="width:100%;height:100%;object-fit:cover">':'<div style="padding:8px;text-align:center">Ảnh mẫu<br>'+p.name+'</div>'}</div>
+          <div style="margin-top:8px">
+            <div class="meta">
+              <div>
+                <div class="title">${escapeHtml(p.name)}</div>
+                <div class="muted" style="font-size:13px">${escapeHtml(capitalize(p.category))}</div>
+              </div>
+              <div class="price">${formatVND(p.price)}</div>
+            </div>
+            <div style="margin-top:10px; display:flex; gap:8px">
+              <button class="btn" data-id="${p.id}" aria-label="Xem chi tiết ${escapeHtml(p.name)}">Xem</button>
+              <button class="btn primary" data-buy="${p.id}">Thêm</button>
+            </div>
+          </div>
+        `;
+        productGrid.appendChild(el);
+      });
+    }
+
+    function renderCart(){
+      cartList.innerHTML = '';
+      if(!state.cart.length){ cartList.innerHTML = '<div class="muted">Chưa có sản phẩm</div>'; cartBtn.textContent = 'Giỏ (0)'; cartTotal.textContent = formatVND(0); return }
+      state.cart.forEach(item => {
+        const row = document.createElement('div'); row.className='cart-item';
+        row.innerHTML = `
+          <div class="cart-thumb">${item.name}</div>
+          <div style="flex:1">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+              <div style="font-weight:600">${escapeHtml(item.name)}</div>
+              <div style="font-weight:700">${formatVND(item.price * item.qty)}</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; margin-top:6px">
+              <button class="btn" data-dec="${item.id}">-</button>
+              <div>${item.qty}</div>
+              <button class="btn" data-inc="${item.id}">+</button>
+              <button class="btn" style="margin-left:auto" data-rm="${item.id}">Xóa</button>
+            </div>
+          </div>
+        `;
+        cartList.appendChild(row);
+      });
+      cartBtn.textContent = `Giỏ (${state.cart.reduce((s,i)=>s+i.qty,0)})`;
+      cartTotal.textContent = formatVND(state.cart.reduce((s,i)=>s+i.price*i.qty,0));
+    }
+
+    // Events - product actions
+    productGrid.addEventListener('click', e => {
+      const id = e.target.getAttribute('data-id');
+      const buy = e.target.getAttribute('data-buy');
+      if(id) openModalById(Number(id));
+      if(buy) addToCartById(Number(buy),1);
+    });
+
+   function openModalById(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+
+  // ✅ Hiển thị ảnh thật của sản phẩm trong modal
+  if (p.img) {
+    modalImg.innerHTML = `<img src="${p.img}" alt="${escapeHtml(p.name)}"
+      style="width:100%;height:100%;object-fit:cover;border-radius:10px;">`;
+  } else {
+    modalImg.textContent = p.name;
+  }
+
+  // Gán thông tin khác
+  modalTitle.textContent = p.name;
+  modalDesc.textContent = p.desc;
+  modalPrice.textContent = formatVND(p.price);
+  modalQty.value = 1;
+  modal.dataset.id = p.id;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+}
+
+
+    closeModal.addEventListener('click', closeProductModal);
+    modal.addEventListener('click', e=>{ if(e.target===modal) closeProductModal(); });
+    function closeProductModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
+
+    addToCartModal.addEventListener('click', ()=>{
+      const id = Number(modal.dataset.id); const qty = Math.max(1, Number(modalQty.value)||1); addToCartById(id, qty); closeProductModal();
+    });
+
+    // Cart functions
+    function addToCartById(id, qty=1){
+      const p = products.find(x=>x.id===id); if(!p) return;
+      const existing = state.cart.find(c=>c.id===id);
+      if(existing) existing.qty += qty; else state.cart.push({id:p.id, name:p.name, price:p.price, qty});
+      renderCart();
+    }
+
+    cartList.addEventListener('click', e=>{
+      const inc = e.target.getAttribute('data-inc');
+      const dec = e.target.getAttribute('data-dec');
+      const rm = e.target.getAttribute('data-rm');
+      if(inc) changeQty(Number(inc), +1);
+      if(dec) changeQty(Number(dec), -1);
+      if(rm) removeFromCart(Number(rm));
+    });
+
+    function changeQty(id, delta){
+      const it = state.cart.find(x=>x.id===id); if(!it) return; it.qty += delta; if(it.qty<=0) removeFromCart(id); renderCart();
+    }
+    function removeFromCart(id){ state.cart = state.cart.filter(x=>x.id!==id); renderCart(); }
+    clearCart.addEventListener('click', ()=>{ state.cart = []; renderCart(); });
+
+    checkout.addEventListener('click', ()=>{
+      if(!state.cart.length){ alert('Giỏ hàng đang rỗng'); return }
+      // Demo: chỉ hiển thị tổng tiền
+      const total = state.cart.reduce((s,i)=>s+i.price*i.qty,0);
+      alert('Tổng phải thanh toán: ' + formatVND(total) + '\n(Đây chỉ là demo, chưa tích hợp cổng thanh toán)');
+    });
+
+    // Search / Filter / Sort
+    function applyAll(){
+      const q = searchInput.value.trim().toLowerCase();
+      let list = products.filter(p => {
+        if(categorySelect.value !== 'all' && p.category !== categorySelect.value) return false;
+        if(minPrice.value && p.price < Number(minPrice.value)) return false;
+        if(maxPrice.value && p.price > Number(maxPrice.value)) return false;
+        if(q && !(p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q))) return false;
+        return true;
+      });
+      const sort = sortSelect.value;
+      if(sort === 'price-asc') list.sort((a,b)=>a.price-b.price);
+      if(sort === 'price-desc') list.sort((a,b)=>b.price-a.price);
+      if(sort === 'name-asc') list.sort((a,b)=>a.name.localeCompare(b.name,'vi'));
+      state.filtered = list; renderProducts(list);
+    }
+
+    searchInput.addEventListener('input', debounce(applyAll, 220));
+    sortSelect.addEventListener('change', applyAll);
+    applyFilter.addEventListener('click', applyAll);
+
+    // cart button toggle (scroll to cart)
+    cartBtn.addEventListener('click', ()=>{ document.querySelector('.sidebar').scrollIntoView({behavior:'smooth'}); });
+
+    // small helpers
+    function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1) }
+    function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+    function debounce(fn,ms=200){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms) }}
+
+    // keyboard: Esc to close modal
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeProductModal(); });
+    // Khi bấm nút "Thành viên" sẽ mở trang khác
+document.getElementById('memberBtn').addEventListener('click', () => {
+  window.location.href = 'member.html'; // đổi link này tùy ý
+});
+
+  </script>
+</body>
+</html>
