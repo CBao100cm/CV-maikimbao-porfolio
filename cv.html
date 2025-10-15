@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Portfolio - Mai Kim Bảo</title>
+<style>
+:root{
+  --accent: #a26a42; /* nâu mocha đậm */
+  --text: #2e1d0e;
+  --text-dim: #5c4531;
+  --card-bg: rgba(255,255,255,0.12);
+}
+
+/* Reset */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:"Poppins",system-ui,sans-serif;}
+#waveCanvas{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  background: linear-gradient(180deg,#f1e4d3 0%, #d7b28a 40%, #a26a42 100%);
+}
+
+/* Nội dung chính */
+body{
+  color:var(--text);
+  background:transparent;
+  overflow-x:hidden;
+}
+
+/* === Nút quay lại === */
+.back-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(162,106,66,0.4);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.back-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.back-btn:hover {
+  background: #8b5632;
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.back-btn:hover svg {
+  transform: translateX(-4px);
+}
+
+/* Header */
+header{text-align:center;padding:70px 20px 40px;}
+header h1{font-size:44px;color:var(--accent);margin-bottom:8px;text-shadow:0 0 15px rgba(162,106,66,0.5)}
+header p{color:var(--text-dim);}
+
+/* Section */
+section{max-width:980px;margin:48px auto;padding:0 20px;opacity:0;transform:translateY(30px);transition:all .9s ease}
+section.visible{opacity:1;transform:translateY(0)}
+section h2{color:var(--accent);border-left:4px solid var(--accent);padding-left:12px;margin-bottom:18px}
+
+/* About */
+.about{
+  display:flex;flex-wrap:wrap;align-items:center;gap:24px;
+  background:var(--card-bg);padding:22px;border-radius:16px;
+  box-shadow:0 6px 25px rgba(0,0,0,0.25);backdrop-filter:blur(10px);
+}
+.about img{width:190px;height:190px;border-radius:50%;object-fit:cover;box-shadow:0 0 20px rgba(0,0,0,0.35)}
+.about .info p{margin:8px 0;color:var(--text-dim)}
+
+/* Skills */
+.skills{display:flex;flex-wrap:wrap;gap:10px}
+.skill{background:rgba(255,255,255,0.55);padding:9px 14px;border-radius:18px;backdrop-filter:blur(4px);font-weight:500}
+
+/* Projects */
+.project{background:rgba(255,255,255,0.65);padding:18px;border-radius:14px;margin-bottom:14px;transition:transform .3s}
+.project:hover{transform:translateY(-5px);box-shadow:0 14px 35px rgba(0,0,0,0.25)}
+
+/* Gallery */
+.gallery{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+.gallery img{width:180px;height:180px;object-fit:cover;border-radius:10px;transition:transform .35s,box-shadow .35s}
+.gallery img:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(0,0,0,0.25)}
+
+/* Socials */
+.socials a{color:var(--accent);text-decoration:none;margin-right:10px}
+.cv{display:inline-block;margin-top:14px;padding:10px 15px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;box-shadow:0 0 10px rgba(162,106,66,0.4)}
+
+/* Footer */
+footer{text-align:center;padding:24px;color:#4a3220}
+
+/* Responsive */
+@media (max-width:720px){
+  .about img{width:140px;height:140px}
+  .gallery img{width:130px;height:130px}
+  header h1{font-size:34px}
+}
+</style>
+</head>
+<body>
+<canvas id="waveCanvas" aria-hidden="true"></canvas>
+
+<!-- 🔙 Nút quay lại -->
+<button class="back-btn" onclick="window.location.href='member.html'">
+  <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M15 18l-6-6 6-6"/>
+  </svg>
+  Quay lại
+</button>
+
+<header id="header">
+  <h1>Mai Kim Bảo</h1>
+  <p>Front-end Developer • UI/UX Enthusiast</p>
+</header>
+
+<!-- Giữ nguyên toàn bộ phần nội dung -->
+<section class="about">
+  <img src="assets/bao2.jpg" alt="Avatar">
+  <div class="info">
+    <p><strong>Tuổi:</strong> 19</p>
+    <p><strong>Chuyên môn:</strong> Front-end Developer</p>
+    <p><strong>Quê quán:</strong> Thủ Dầu Một</p>
+    <p><strong>Sở thích:</strong> Lập trình web, đọc sách kỹ thuật, thiết kế giao diện.</p>
+    <p>Mình là Mai Kim Bảo, sinh viên năm 2 ngành Công nghệ thông tin tại Trường Đại học Bình Dương.  
+    Mình có niềm đam mê với lập trình web và thiết kế giao diện người dùng (UI/UX) — nơi mình có thể kết hợp giữa sáng tạo và kỹ thuật để tạo nên những sản phẩm đẹp mắt và hữu ích.  
+    Trong quá trình học tập, mình đã tham gia một số dự án nhỏ, trong đó có website bán hàng – giúp mình hiểu rõ hơn về quy trình xây dựng trang web, tối ưu trải nghiệm người dùng và tổ chức mã nguồn hiệu quả.  
+    Mục tiêu của mình là trở thành một Front-end Developer chuyên nghiệp, không chỉ giỏi về kỹ thuật mà còn có gu thẩm mỹ, biết cách mang đến trải nghiệm trực quan và mượt mà cho người dùng.</p>
+
+    <div class="socials" style="margin-top:16px;">
+
+  <p style="margin:6px 0;">
+    <svg width="20" height="20" fill="#fff" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px">
+      <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.91.76a1 1 0 011 1V21a1 1 0 01-1 1C10.29 22 2 13.71 2 3a1 1 0 011-1h3.76a1 1 0 011 1c0 1.38.27 2.7.76 3.91a1 1 0 01-.21 1.11l-2.2 2.2z"/>
+    </svg>
+    <strong style="color:#b37c57;">Điện thoại:</strong>
+    <span style="color:#b37c57; margin-left:4px;">0909 999 999</span>
+  </p>
+
+  <p style="margin:6px 0;">
+    <svg width="20" height="20" fill="#fff" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:6px">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4a2 2 0 01-2-2V6c0-1.1.9-2 2-2zm8 7l8-5H4l8 5zm0 2l-8-5v10h16V8l-8 5z"/>
+    </svg>
+    <strong style="color:#b37c57;">Email:</strong>
+    <span style="color:#b37c57; margin-left:4px;">maikimbao@gmail.com</span>
+  </p>
+
+  <div style="margin-top:8px;">
+    <a href="https://www.facebook.com/share/1Sq2UBr8KP/?mibextid=wwXIfr" target="_blank" title="Facebook" style="margin-right:12px;">
+      <svg width="22" height="22" fill="#fff" viewBox="0 0 24 24">
+        <path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-3h2v-2.3c0-2 1.2-3.1 3-3.1.9 0 1.8.1 2 .1v2.3h-1.1c-1.1 0-1.4.7-1.4 1.4V12h2.5l-.4 3h-2.1v7A10 10 0 0022 12z"/>
+      </svg>
+    </a>
+
+    <a href="https://github.com/CBao100cm" target="_blank" title="GitHub" style="margin-right:12px;">
+      <svg width="22" height="22" fill="#fff" viewBox="0 0 24 24">
+        <path d="M12 .5C5.7.5.6 5.6.6 11.9c0 5 3.2 9.2 7.7 10.7.6.1.8-.3.8-.6v-2c-3.1.7-3.8-1.3-3.8-1.3-.5-1.3-1.1-1.6-1.1-1.6-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.7-1.4-2.5-.3-5.2-1.2-5.2-5.6 0-1.2.4-2.2 1.1-3-.1-.3-.5-1.4.1-3 0 0 .9-.3 3 .9a10.2 10.2 0 015.5 0c2.1-1.2 3-.9 3-.9.6 1.6.2 2.7.1 3 .7.8 1.1 1.8 1.1 3 0 4.5-2.7 5.3-5.2 5.6.4.3.8 1 .8 2v3c0 .3.2.7.8.6A10.9 10.9 0 0023.4 12C23.4 5.6 18.3.5 12 .5z"/>
+      </svg>
+    </a>
+
+    <a href="https://www.linkedin.com/me?trk=p_mwlite_feed-secondary_nav" target="_blank" title="LinkedIn">
+      <svg width="22" height="22" fill="#fff" viewBox="0 0 24 24">
+        <path d="M19 0h-14c-2.8 0-5 2.2-5 5v14c0 2.8 2.2 5 5 5h14c2.8 0 5-2.2 5-5v-14c0-2.8-2.2-5-5-5zm-11.8 20h-3v-10h3v10zm-1.5-11.4c-1 0-1.8-.8-1.8-1.8S4.7 5 5.7 5s1.8.8 1.8 1.8S6.7 8.6 5.7 8.6zM20 20h-3v-5.4c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9V20h-3v-10h2.8v1.4h.1c.4-.7 1.4-1.5 2.8-1.5 3 0 3.5 2 3.5 4.7V20z"/>
+      </svg>
+    </a>
+  </div>
+
+</div>
+</section>
+
+<section>
+  <h2>Kỹ năng</h2>
+  <div class="skills">
+    <div class="skill">HTML / CSS / JS</div>
+    <div class="skill">React</div>
+    <div class="skill">Responsive</div>
+    <div class="skill">UI/UX</div>
+    <div class="skill">Animation (CSS/Canvas)</div>
+  </div>
+</section>
+
+<section>
+  <h2>Dự án</h2>
+  <div class="project"><strong>Website Bán hàng</strong><p>Thiết kế và lập trình giao diện website bán hàng thân thiện, trực quan, tối ưu UX/UI giúp người dùng dễ thao tác và mua sắm.</p></div>
+  <div class="project"><strong>Portfolio cá nhân</strong><p>Trang giới thiệu kỹ năng và dự án, trình bày chuyên nghiệp và có hiệu ứng động nhẹ.</p></div>
+  <div class="project"><strong>Landing Page sự kiện</strong><p>Thiết kế đơn giản, mượt mà, có animation và bố cục rõ ràng.</p></div>
+</section>
+
+<section>
+  <h2>Bộ sưu tập ảnh</h2>
+  <div class="gallery">
+    <img src="assets/bao1.jpg" alt="">
+    <img src="assets/bao3.jpg" alt="">
+    <img src="assets/bao4.jpg" alt="">
+    <img src="assets/bao5.jpg" alt="">
+  </div>
+</section>
+
+<footer>© 2025 Mai Kim Bảo — Portfolio</footer>
+
+<script>
+(() => {
+  const canvas = document.getElementById("waveCanvas");
+  const ctx = canvas.getContext("2d");
+  let w, h, t = 0;
+
+  function resize() {
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = w;
+    canvas.height = h;
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  function drawWave(yOffset, amplitude, wavelength, color, speed, phaseShift){
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    for(let x = 0; x <= w; x++){
+      const y = Math.sin((x / wavelength) + t * speed + phaseShift) * amplitude + yOffset;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  function animate(){
+    t += 0.014;
+    ctx.clearRect(0, 0, w, h);
+
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, "#f1e4d3");
+    grad.addColorStop(0.5, "#d7b28a");
+    grad.addColorStop(1, "#a26a42");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    drawWave(h * 0.78, 35, 260, "rgba(255,255,255,0.45)", 0.35, 0);
+    drawWave(h * 0.80, 45, 320, "rgba(255,255,255,0.35)", 0.3, 2);
+    drawWave(h * 0.83, 55, 400, "rgba(255,255,255,0.3)", 0.25, 4);
+
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+/* Hiệu ứng hiện ra khi cuộn */
+(() => {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, {threshold: 0.15});
+  document.querySelectorAll('section, header').forEach(el => observer.observe(el));
+})();
+</script>
+</body>
+</html>
